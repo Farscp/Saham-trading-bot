@@ -23,33 +23,30 @@ def send_telegram_message(text):
         print(f"خطأ في إرسال الرسالة: {e}")
 
 # ==========================================
-# 2. قائمة المراقبة العالمية والمحلية الشاملة
+# 2. قائمة المراقبة الشاملة (عمالقة + شركات نامية وواعدة)
 # ==========================================
 WATCHLIST = [
-    # 🇸🇦 السوق السعودي (TADAWUL)
+    # 🚀 شركات نامية وواعدة (Growth & High Potential)
+    {"symbol": "PLTR", "name": "Palantir Technologies", "category": "🚀 شركة نامية (ذكاء اصطناعي وبيانات)"},
+    {"symbol": "CRWD", "name": "CrowdStrike Holdings", "category": "🚀 شركة نامية (أمن سيبراني)"},
+    {"symbol": "AMD", "name": "Advanced Micro Devices", "category": "🚀 شركة نامية (أشباه موصلات)"},
+    {"symbol": "IWM", "name": "Russell 2000 ETF", "category": "🚀 مؤشر أداء أفضل 2000 شركة أمريكية صغيرة ونامية"},
+    {"symbol": "7200.SR", "name": "المعمر لتقنية المعلومات (MIS)", "category": "🇸🇦 🚀 شركة نامية (تقنية معلومات سعودية)"},
+
+    # 🇸🇦 القياديات في السوق السعودي (TADAWUL)
     {"symbol": "1120.SR", "name": "مصرف الراجحي", "category": "🇸🇦 القطاع البنكي السعودي"},
     {"symbol": "2222.SR", "name": "أرامكو السعودية", "category": "🇸🇦 قطاع الطاقة السعودي"},
-    {"symbol": "1180.SR", "name": "البنك الأهلي السعودي", "category": "🇸🇦 القطاع البنكي السعودي"},
     {"symbol": "7010.SR", "name": "إس تي سي STC", "category": "🇸🇦 الاتصالات السعودية"},
-    {"symbol": "4330.SR", "name": "صندوق دراية ريت", "category": "🇸🇦 صناديق العقار والمبالغ"},
-    
-    # 🇺🇸 عمالقة التكنولوجيا والنمو
-    {"symbol": "NVDA", "name": "NVIDIA Corporation", "category": "🇺🇸 الذكاء الاصطناعي والرقائق"},
-    {"symbol": "AAPL", "name": "Apple Inc.", "category": "🇺🇸 التقنية الاستهلاكية"},
-    {"symbol": "MSFT", "name": "Microsoft", "category": "🇺🇸 السحابيات والذكاء الاصطناعي"},
-    {"symbol": "GOOGL", "name": "Alphabet (Google)", "category": "🇺🇸 محركات البحث والإعلان"},
-    {"symbol": "AMZN", "name": "Amazon", "category": "🇺🇸 التجارة الإلكترونية والسحابية"},
-    {"symbol": "TSLA", "name": "Tesla Inc.", "category": "🇺🇸 السيارات الكهربائية"},
 
-    # 🌐 الاقتصاد العالمي والأسواق الناشئة
-    {"symbol": "VT", "name": "Vanguard Total World Stock", "category": "🌐 أسهم العالم أجمع (تنوع عالمي)"},
-    {"symbol": "VWO", "name": "Vanguard FTSE Emerging Markets", "category": "🌏 الأسواق الناشئة (الصين، الهند، إلخ)"},
+    # 🇺🇸 عمالقة التكنولوجيا والسوق الأمريكي
+    {"symbol": "NVDA", "name": "NVIDIA Corporation", "category": "🇺🇸 عملاق الذكاء الاصطناعي"},
+    {"symbol": "AAPL", "name": "Apple Inc.", "category": "🇺🇸 عملاق التقنية الاستهلاكية"},
+    {"symbol": "TSLA", "name": "Tesla Inc.", "category": "🇺🇸 السيارات الكهربائية والنمو"},
     {"symbol": "VOO", "name": "Vanguard S&P 500 ETF", "category": "🇺🇸 أكبر 500 شركة أمريكية"},
     {"symbol": "QQQ", "name": "Invesco QQQ Trust", "category": "💻 مؤشر قطاع التقنية الأمريكي"},
 
-    # 🥇 الذهب والنفط (الملاذات الآمنة والسلع)
-    {"symbol": "GLD", "name": "SPDR Gold Shares", "category": "🥇 صندوق الذهب العالمي"},
-    {"symbol": "USO", "name": "United States Oil Fund", "category": "🛢️ صندوق النفط الخام"}
+    # 🥇 الملاذات والسلع
+    {"symbol": "GLD", "name": "SPDR Gold Shares", "category": "🥇 صندوق الذهب العالمي"}
 ]
 
 # ذاكرة مؤقتة لمنع تكرار التنبيهات خلال 24 ساعة
@@ -76,7 +73,7 @@ def get_latest_news_summary(symbol):
 # 4. دالة الفحص والتحليل الفني
 # ==========================================
 def analyze_market():
-    print("جاري فحص الأسواق العالمية والمحلية...")
+    print("جاري فحص الأسواق والشركات النامية والقيادية...")
     current_time = time.time()
 
     for item in WATCHLIST:
@@ -125,7 +122,7 @@ def analyze_market():
                 currency = "SAR" if ".SR" in symbol else "USD"
 
                 message = (
-                    f"🚨 *تنبيه فرصة استثمارية عالمية/محليّة*\n\n"
+                    f"🚨 *تنبيه فرصة استثمارية (شركات نامية / قيادية)*\n\n"
                     f"📌 *الأصل / السهم:* {name} (`{symbol}`)\n"
                     f"📁 *التصنيف:* {category}\n\n"
                     f"📊 *الحالة الفنية:* 🎯 فرصة دخول محتملة (منطقة تشبع بيعي)\n"
@@ -150,7 +147,7 @@ def analyze_market():
 # 5. التشغيل المستمر
 # ==========================================
 if __name__ == "__main__":
-    print("تم إقلاع الرادار العالمي والمحلي بنجاح...")
+    print("تم إقلاع البوت المطور المخصص للشركات النامية والعملاقة بنجاح...")
     while True:
         analyze_market()
         time.sleep(3600)  # فحص كلي كل ساعة
