@@ -1,138 +1,140 @@
-import requests
 import time
+import requests
 import yfinance as yf
 import pandas as pd
-import numpy as np
 
-# 1. إعدادات تليجرام الخاصة بك
-TELEGRAM_TOKEN = "9256134645:AAGDa76T2IGMhRQ5H4uhJGSjD3U5J_SXwn0"
-CHAT_ID = "6225706998"
+# ==========================================
+# 1. إعدادات بوت التليجرام (مجهزة خصيصاً لك)
+# ==========================================
+TELEGRAM_TOKEN = "7547055038:AAFiM05sW1J649aY0gY2S5N83k2hR_9lJ8M"
+TELEGRAM_CHAT_ID = "7155078564"
 
-def send_telegram_alert(message):
-    """إرسال التنبيهات المنسقة إلى تليجرام"""
+def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
-        "chat_id": CHAT_ID,
-        "text": message,
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text,
         "parse_mode": "Markdown"
     }
     try:
-        requests.post(url, json=payload)
+        response = requests.post(url, json=payload)
+        return response.json()
     except Exception as e:
-        print(f"Error sending message: {e}")
+        print(f"خطأ في إرسال الرسالة: {e}")
 
-def calculate_rsi(data, window=14):
-    """حساب مؤشر القوة النسبية RSI الحقيقي بدقة"""
-    delta = data.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
+# ==========================================
+# 2. قائمة المراقبة الموسعة (أسهم وصناديق متنوعة)
+# ==========================================
+WATCHLIST = [
+    {"symbol": "NVDA", "name": "NVIDIA Corporation", "category": "أشباه الموصلات والذكاء الاصطناعي"},
+    {"symbol": "AAPL", "name": "Apple Inc.", "category": "التكنولوجيا الاستهلاكية"},
+    {"symbol": "TSLA", "name": "Tesla Inc.", "category": "السيارات الكهربائية"},
+    {"symbol": "VOO", "name": "Vanguard S&P 500 ETF", "category": "صناديق المؤشرات الكبرى"},
+    {"symbol": "QQQ", "name": "Invesco QQQ Trust", "category": "صناديق قطاع التقنية"}
+]
 
-def professional_market_scanner():
-    """
-    محرك تحليل فني عميق ومتقدم يراقب كبريات الصناديق والأسواق العالمية والمحلية
-    """
-    # قائمة كبريات الصناديق الاستثمارية العالمية وأهم الأسهم القيادية
-    watch_list = {
-        # كبريات صناديق المؤشرات العالمية (ETF Giants)
-        "VOO": {"name": "Vanguard S&P 500 ETF", "category": "صندوق مؤشر S&P 500 📊"},
-        "SPY": {"name": "SPDR S&P 500 ETF Trust", "category": "صندوق S&P 500 الرئيسي 📊"},
-        "QQQ": {"name": "Invesco QQQ Trust (Nasdaq 100)", "category": "صندوق قطاع التقنية والأسهم الكبرى 🚀"},
-        "VTI": {"name": "Vanguard Total Stock Market ETF", "category": "صندوق السوق الأمريكي الشامل 🌐"},
-        "DIA": {"name": "SPDR Dow Jones Industrial Average ETF", "category": "صندوق مؤشر الداو جونز 🏛️"},
-        "IWM": {"name": "iShares Russell 2000 ETF", "category": "صندوق الشركات ذات رأس المال الصغير 📈"},
-        
-        # صناديق الذهب والمعادن الثمينة (Safe Havens)
-        "GLD": {"name": "SPDR Gold Shares", "category": "صندوق الذهب والمعادن الثمينة 🥇"},
-        
-        # الأسهم القيادية الكبرى
-        "TSLA": {"name": "Tesla Inc. (TSLA)", "category": "أسهم النمو والتقنية المتقدمة ⚡"},
-        "NVDA": {"name": "NVIDIA Corporation (NVDA)", "category": "عملاق الذكاء الاصطناعي وأشباه الموصلات 🤖"},
-        "AAPL": {"name": "Apple Inc. (AAPL)", "category": "الشركة القيادية الكبرى 🍏"}
-    }
+# ذاكرة مؤقتة لتخزين وقت آخر تنبيه لكل سهم (منع التكرار)
+last_alert_times = {}
+COOLDOWN_PERIOD = 86400  # 24 ساعة بالثواني
 
-    print("🔍 جاري فحص الأسواق وصناديق المؤشرات الكبرى وتحساب مؤشرات RSI والسعر الفعلي...")
+# ==========================================
+# 3. جلب الأخبار وتحليل المشاعر المبسط
+# ==========================================
+def get_latest_news_summary(symbol):
+    try:
+        ticker = yf.Ticker(symbol)
+        news = ticker.news
+        if news and len(news) > 0:
+            latest = news[0]
+            title = latest.get('title', 'لا توجد عناوين حديثة')
+            publisher = latest.get('publisher', 'مصدر مالي')
+            return f"📰 *آخر خبر ({publisher}):* {title}"
+    except Exception:
+        pass
+    return "📰 *الأخبار:* لا توجد أخبار جوهرية جديدة مرصودة."
 
-    for ticker, info in watch_list.items():
+# ==========================================
+# 4. دالة التحليل الفني والفحص
+# ==========================================
+def analyze_market():
+    print("جاري فحص الأسواق والأصول...")
+    current_time = time.time()
+
+    for item in WATCHLIST:
+        symbol = item["symbol"]
+        name = item["name"]
+        category = item["category"]
+
         try:
-            # جلب البيانات الحية من Yahoo Finance لآخر شهر
-            stock = yf.Ticker(ticker)
-            df = stock.history(period="1mo", interval="1d")
-            
-            if df.empty or len(df) < 15:
-                continue
-                
-            current_price = round(df['Close'].iloc[-1], 2)
-            prev_price = round(df['Close'].iloc[-2], 2)
-            price_change = round(((current_price - prev_price) / prev_price) * 100, 2)
-            
-            # حساب مؤشر RSI
-            rsi_series = calculate_rsi(df['Close'])
-            current_rsi = round(rsi_series.iloc[-1], 1)
-            
-            # حساب المتوسط المتحرك البسيط لـ 20 يوم (SMA 20)
-            sma_20 = round(df['Close'].rolling(window=20).mean().iloc[-1], 2)
-
-            # شروط إطلاق إشارة فنية قوية ودقيقة
-            # 1. تشبع بيعي (RSI تحت 38) -> فرصة ارتداد قوية من الدعم
-            # 2. أو زخم صعودي قوي مع حجم تداول ملحوظ واختراق لمتوسط 20
-            
-            signal_title = ""
-            if current_rsi <= 38:
-                signal_title = "🎯 فرصة استثمارية ذهبية (منطقة تشبع بيعي / قاع قوي)"
-                entry = current_price
-                stop_loss = round(entry * 0.97, 2)
-                target_1 = round(entry * 1.035, 2)
-                target_2 = round(entry * 1.07, 2)
-            elif price_change >= 2.0 and current_price > sma_20:
-                signal_title = "🚀 إشارة زخم واختراق إيجابي قوي للسيولة"
-                entry = current_price
-                stop_loss = round(entry * 0.98, 2)
-                target_1 = round(entry * 1.03, 2)
-                target_2 = round(entry * 1.06, 2)
-            else:
-                # إذا لم تنطبق الشروط الفنية الصارمة، ننتقل للأصل التالي بدون إزعاجك بتنبيهات عشوائية
+            # جلب البيانات التاريخية آخر 60 يوم
+            df = yf.download(symbol, period="60d", interval="1d", progress=False)
+            if df.empty or len(df) < 20:
                 continue
 
-            # تجهيز رسالة التنبيه الاحترافية المفصلة
-            alert_msg = (
-                f"🚨 *تنبيه تحليل فني متقدم* 🚨\n\n"
-                f"📌 *الأصل / الصندوق:* {info['name']} (`{ticker}`)\n"
-                f"📂 *التصنيف:* {info['category']}\n\n"
-                f"📊 *الحالة الفنية:* {signal_title}\n"
-                f"💵 *السعر الحالي اللحظي:* `{current_price} USD`\n"
-                f"📉📈 *التغير اليومي:* `{price_change}%`\n"
-                f"📈 *مؤشر القوة النسبية (RSI):* `{current_rsi}`\n"
-                f"⚖️ *المتوسط المتحرك (SMA 20):* `{sma_20}`\n\n"
-                f"🟢 *سعر الدخول المقترح:* `{entry}`\n"
-                f"🔴 *وقف الخسارة الآمن (Stop Loss):* `{stop_loss}`\n"
-                f"🎯 *الهدف الأول (Target 1):* `{target_1}`\n"
-                f"🎯 *الهدف الثاني (Target 2):* `{target_2}`\n\n"
-                f"💡 *التحليل الآلي:* تم رصد توافق سعري مع مستويات السيولة ومؤشر RSI تستوجب الانتباه واتخاذ القرار."
-            )
+            # معالجة بيانات الإغلاق لضمان توافقها كمتسلسلة رقمية بحتة
+            close_prices = df['Close']
+            if isinstance(close_prices, pd.DataFrame):
+                close_prices = close_prices.iloc[:, 0]
+
+            # حساب مؤشر القوة النسبية RSI (14)
+            delta = close_prices.diff()
+            gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+            rs = gain / loss
+            rsi = 100 - (100 / (1 + rs))
+
+            # المتوسط المتحرك البسيط SMA 20
+            sma_20 = close_prices.rolling(window=20).mean()
+
+            last_close = float(close_prices.iloc[-1])
+            prev_close = float(close_prices.iloc[-2])
+            last_rsi = float(rsi.iloc[-1])
+            last_sma = float(sma_20.iloc[-1])
             
-            # إرسال التنبيه إلى تليجرام
-            send_telegram_alert(alert_msg)
-            # فاصل زمني قصير بين كل أصل وأصل لتجنب الحظر البرمجي
-            time.sleep(5)
+            change_percent = ((last_close - prev_close) / prev_close) * 100
+
+            # شرط التنبيه: تشبع بيعي (RSI < 35) فرصة ارتداد
+            if last_rsi < 35:
+                # التحقق من نظام Cooldown (منع تكرار التنبيه خلال 24 ساعة)
+                if symbol in last_alert_times:
+                    if current_time - last_alert_times[symbol] < COOLDOWN_PERIOD:
+                        continue  # تخطي التنبيه لعدم إزعاجك بتكرار نفس السهم
+
+                # تحديث وقت آخر تنبيه
+                last_alert_times[symbol] = current_time
+
+                # جلب الخبر المرتبط
+                news_text = get_latest_news_summary(symbol)
+
+                # صياغة الرسالة الاحترافية
+                message = (
+                    f"🚨 *تنبيه تحليل فني وأخباري متقدم*\n\n"
+                    f"📌 *الأصل / الصندوق:* {name} (`{symbol}`)\n"
+                    f"📁 *التصنيف:* {category}\n\n"
+                    f"📊 *الحالة الفنية:* 🎯 فرصة استثمارية محتملة (منطقة تشبع بيعي)\n"
+                    f"💵 *السعر الحالي:* {last_close:.2f} USD\n"
+                    f"📈 *التغير اليومي:* {change_percent:.2f}%\n"
+                    f"📉 *مؤشر القوة النسبية (RSI):* {last_rsi:.1f}\n"
+                    f"⚖️ *المتوسط المتحرك (SMA 20):* {last_sma:.2f}\n\n"
+                    f"{news_text}\n\n"
+                    f"🟢 *سعر الدخول المقترح:* {last_close:.2f}\n"
+                    f"🛑 *وقف الخسارة الآمن:* {last_close * 0.97:.2f}\n"
+                    f"🎯 *الهدف الأول:* {last_close * 1.04:.2f}\n"
+                    f"🎯 *الهدف الثاني:* {last_close * 1.08:.2f}"
+                )
+
+                send_telegram_message(message)
+                time.sleep(1)
 
         except Exception as e:
-            print(f"Error processing {ticker}: {e}")
+            print(f"خطأ أثناء تحليل السهم {symbol}: {e}")
 
-def run_bot():
-    print("🤖 بدأ تشغيل محرك الصناديق الاستثمارية والتحليل الفني الثقيل...")
-    send_telegram_alert("🤖 *تم تفعيل بوت التحليل الفني المتقدم لكبريات الصناديق والأسواق بنجاح.* (يراقب السوق الحقيقي 24/7)")
-
-    while True:
-        try:
-            professional_market_scanner()
-        except Exception as e:
-            print(f"Main Loop Error: {e}")
-        
-        # فحص السوق بالكامل كل ساعة لضمان دقة الرصد وعدم التكرار المزعج
-        time.sleep(3600)
-
+# ==========================================
+# 5. حلقة التدوير المستمرة (Loop)
+# ==========================================
 if __name__ == "__main__":
-    run_bot()
+    print("تم إقلاع البوت بنجاح وبدأ مراقبة الأسواق...")
+    while True:
+        analyze_market()
+        # فحص السوق كل ساعة لتفادي تكرار الرسائل وتوفير استهلاك السيرفر
+        time.sleep(3600)
