@@ -45,6 +45,10 @@ WATCHLIST = [
     {"symbol": "VOO", "name": "Vanguard S&P 500 ETF", "category": "🇺🇸 أكبر 500 شركة أمريكية"},
     {"symbol": "QQQ", "name": "Invesco QQQ Trust", "category": "💻 مؤشر قطاع التقنية الأمريكي"},
 
+    # 🌐 الاقتصاد العالمي والأسواق الناشئة
+    {"symbol": "VT", "name": "Vanguard Total World Stock", "category": "🌐 أسهم العالم أجمع (تنوع عالمي)"},
+    {"symbol": "VWO", "name": "Vanguard FTSE Emerging Markets", "category": "🌏 الأسواق الناشئة"},
+
     # 🥇 الملاذات والسلع
     {"symbol": "GLD", "name": "SPDR Gold Shares", "category": "🥇 صندوق الذهب العالمي"}
 ]
@@ -54,7 +58,7 @@ last_alert_times = {}
 COOLDOWN_PERIOD = 86400  # 24 ساعة
 
 # ==========================================
-# 3. جلب الأخبار العاجلة
+# 3. جلب الأخبار العاجلة مع حماية من الأخطاء
 # ==========================================
 def get_latest_news_summary(symbol):
     try:
@@ -82,7 +86,8 @@ def analyze_market():
         category = item["category"]
 
         try:
-            # جلب البيانات لآخر 60 يوم
+            # جلب البيانات مع تأخير بسيط لتجنب حظر السيرفرات (Rate-limit)
+            time.sleep(2)
             df = yf.download(symbol, period="60d", interval="1d", progress=False)
             if df.empty or len(df) < 20:
                 continue
@@ -138,7 +143,6 @@ def analyze_market():
                 )
 
                 send_telegram_message(message)
-                time.sleep(1)
 
         except Exception as e:
             print(f"خطأ أثناء تحليل {symbol}: {e}")
@@ -147,7 +151,7 @@ def analyze_market():
 # 5. التشغيل المستمر
 # ==========================================
 if __name__ == "__main__":
-    print("تم إقلاع البوت المطور المخصص للشركات النامية والعملاقة بنجاح...")
+    print("تم إقلاع الرادار المحدث والمحمي بنجاح...")
     while True:
         analyze_market()
         time.sleep(3600)  # فحص كلي كل ساعة
