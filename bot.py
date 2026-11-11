@@ -4,10 +4,10 @@ import yfinance as yf
 import pandas as pd
 
 # ==========================================
-# 1. إعدادات بوت التليجرام الخاص بك
+# 1. إعدادات بوت التليجرام الجديد والخاص بك
 # ==========================================
-TELEGRAM_TOKEN = "7547055038:AAFiM05sW1J649aY0gY2S5N83k2hR_9lJ8M"
-TELEGRAM_CHAT_ID = "7155078564"
+TELEGRAM_TOKEN = "9256134645:AAGDa76T2IGMhRQ5H4uhJGSjD3U5J_SXwn0"
+TELEGRAM_CHAT_ID = "6225706998"
 
 def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -22,8 +22,8 @@ def send_telegram_message(text):
     except Exception as e:
         print(f"خطأ في إرسال الرسالة: {e}")
 
-# رسالة تجريبية فورية للتأكد من اتصال تليجرام
-send_telegram_message("🟢 *رادار الأسواق يعمل بنجاح!* تم إقلاع السيرفر وبدء مراقبة القائمة الشاملة.")
+# رسالة تجريبية فورية للتأكد من اتصال تليجرام البوت الجديد
+send_telegram_message("🟢 *رادار الأسواق يعمل بنجاح عبر FARtradingbot!* تم ربط البوت وبدء مراقبة القائمة الشاملة.")
 
 # ==========================================
 # 2. قائمة المراقبة الشاملة (عمالقة + شركات نامية وواعدة)
